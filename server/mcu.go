@@ -25,6 +25,7 @@ func NewMCUHandler(movies domain.MoviesService) *MCUHandler {
 func (h *MCUHandler) RegisterRoutes(r *mux.Router) {
 	r.HandleFunc("/movies", h.GetMovies).Methods(http.MethodGet)
 	r.HandleFunc("/movies/{id}", h.GetMovie)
+	r.HandleFunc("/sagas", h.GetSagas).Methods(http.MethodGet)
 }
 
 func (h *MCUHandler) GetMovies(w http.ResponseWriter, r *http.Request) {
@@ -67,6 +68,39 @@ func (h *MCUHandler) GetMovie(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondJSON(w, http.StatusOK, movie)
+}
+
+func (h *MCUHandler) GetSagas(w http.ResponseWriter, r *http.Request) {
+	name := r.URL.Query().Get("name")
+
+	movies, err := h.movies.GetMovies(r.Context())
+	if err != nil {
+		log.Printf("GetMovies request error: %s\n", err)
+		switch {
+		default:
+			respondError(w, http.StatusInternalServerError, "Internal server error")
+		}
+		return
+	}
+
+	if name == "" {
+		respondJSON(w, http.StatusOK, movies.GroupBySaga())
+		return
+	}
+
+	saga, err := movies.GetSaga(name)
+	if err != nil {
+		log.Printf("get saga error: %s\n", err)
+		switch {
+		case errors.Is(err, domain.ErrSagaNotFound):
+			respondError(w, http.StatusNotFound, "Saga not found")
+		default:
+			respondError(w, http.StatusInternalServerError, "Internal server error")
+		}
+		return
+	}
+
+	respondJSON(w, http.StatusOK, saga)
 }
 
 func respondError(w http.ResponseWriter, statusCode int, errMsg string) {
