@@ -23,17 +23,17 @@ type FakeMoviesService struct {
 		result1 *domain.Movie
 		result2 error
 	}
-	GetMoviesStub        func(context.Context) ([]*domain.Movie, error)
+	GetMoviesStub        func(context.Context) (domain.Movies, error)
 	getMoviesMutex       sync.RWMutex
 	getMoviesArgsForCall []struct {
 		arg1 context.Context
 	}
 	getMoviesReturns struct {
-		result1 []*domain.Movie
+		result1 domain.Movies
 		result2 error
 	}
 	getMoviesReturnsOnCall map[int]struct {
-		result1 []*domain.Movie
+		result1 domain.Movies
 		result2 error
 	}
 	invocations      map[string][][]interface{}
@@ -105,7 +105,7 @@ func (fake *FakeMoviesService) GetMovieReturnsOnCall(i int, result1 *domain.Movi
 	}{result1, result2}
 }
 
-func (fake *FakeMoviesService) GetMovies(arg1 context.Context) ([]*domain.Movie, error) {
+func (fake *FakeMoviesService) GetMovies(arg1 context.Context) (domain.Movies, error) {
 	fake.getMoviesMutex.Lock()
 	ret, specificReturn := fake.getMoviesReturnsOnCall[len(fake.getMoviesArgsForCall)]
 	fake.getMoviesArgsForCall = append(fake.getMoviesArgsForCall, struct {
@@ -130,7 +130,7 @@ func (fake *FakeMoviesService) GetMoviesCallCount() int {
 	return len(fake.getMoviesArgsForCall)
 }
 
-func (fake *FakeMoviesService) GetMoviesCalls(stub func(context.Context) ([]*domain.Movie, error)) {
+func (fake *FakeMoviesService) GetMoviesCalls(stub func(context.Context) (domain.Movies, error)) {
 	fake.getMoviesMutex.Lock()
 	defer fake.getMoviesMutex.Unlock()
 	fake.GetMoviesStub = stub
@@ -143,28 +143,28 @@ func (fake *FakeMoviesService) GetMoviesArgsForCall(i int) context.Context {
 	return argsForCall.arg1
 }
 
-func (fake *FakeMoviesService) GetMoviesReturns(result1 []*domain.Movie, result2 error) {
+func (fake *FakeMoviesService) GetMoviesReturns(result1 domain.Movies, result2 error) {
 	fake.getMoviesMutex.Lock()
 	defer fake.getMoviesMutex.Unlock()
 	fake.GetMoviesStub = nil
 	fake.getMoviesReturns = struct {
-		result1 []*domain.Movie
+		result1 domain.Movies
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *FakeMoviesService) GetMoviesReturnsOnCall(i int, result1 []*domain.Movie, result2 error) {
+func (fake *FakeMoviesService) GetMoviesReturnsOnCall(i int, result1 domain.Movies, result2 error) {
 	fake.getMoviesMutex.Lock()
 	defer fake.getMoviesMutex.Unlock()
 	fake.GetMoviesStub = nil
 	if fake.getMoviesReturnsOnCall == nil {
 		fake.getMoviesReturnsOnCall = make(map[int]struct {
-			result1 []*domain.Movie
+			result1 domain.Movies
 			result2 error
 		})
 	}
 	fake.getMoviesReturnsOnCall[i] = struct {
-		result1 []*domain.Movie
+		result1 domain.Movies
 		result2 error
 	}{result1, result2}
 }

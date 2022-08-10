@@ -77,7 +77,7 @@ func (m *movie) toDomain() (*domain.Movie, error) {
 	}, nil
 }
 
-func (c *MCUClient) GetMovies(ctx context.Context) ([]*domain.Movie, error) {
+func (c *MCUClient) GetMovies(ctx context.Context) (domain.Movies, error) {
 	endpoint := "/movies"
 	req, err := c.newRequest(ctx, http.MethodGet, endpoint, nil)
 	if err != nil {
@@ -101,7 +101,7 @@ func (c *MCUClient) GetMovies(ctx context.Context) ([]*domain.Movie, error) {
 		return nil, fmt.Errorf("%w: %d", ErrStatusCodeUnknown, rsp.StatusCode)
 	}
 
-	movies := make([]*domain.Movie, len(res.Data))
+	movies := make(domain.Movies, len(res.Data))
 	for i, m := range res.Data {
 		movie, err := m.toDomain()
 		if err != nil {

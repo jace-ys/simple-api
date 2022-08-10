@@ -8,6 +8,7 @@ require (
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.5.0
 	github.com/prometheus/client_golang v1.13.0
 	github.com/stretchr/testify v1.8.0
+	golang.org/x/text v0.3.7
 )
 
 require (

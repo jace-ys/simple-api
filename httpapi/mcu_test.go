@@ -43,13 +43,13 @@ func TestGetMovies(t *testing.T) {
 	tt := []struct {
 		Name             string
 		DownstreamStatus int
-		ExpectedBody     []*domain.Movie
+		ExpectedBody     domain.Movies
 		ExpectedError    error
 	}{
 		{
 			Name:             "Returns movies when downstream request succeeds",
 			DownstreamStatus: http.StatusOK,
-			ExpectedBody:     []*domain.Movie{movie1, movie2},
+			ExpectedBody:     domain.Movies{movie1, movie2},
 		},
 		{
 			Name:             "Returns ErrDownstreamUnavailable when downstream unavailable",
