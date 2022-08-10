@@ -1,4 +1,4 @@
-package httpapi_test
+package mcu_test
 
 import (
 	"context"
@@ -12,6 +12,7 @@ import (
 
 	"github.com/jace-ys/simple-api/domain"
 	"github.com/jace-ys/simple-api/httpapi"
+	"github.com/jace-ys/simple-api/httpapi/mcu"
 )
 
 func TestGetMovies(t *testing.T) {
@@ -65,9 +66,9 @@ func TestGetMovies(t *testing.T) {
 
 	for _, tc := range tt {
 		t.Run(tc.Name, func(t *testing.T) {
-			handler, client := setup(t)
+			handler, client := setupMCU(t)
 
-			fixture, err := os.ReadFile("fixtures/mcu/list-movies.json")
+			fixture, err := os.ReadFile("fixtures/list-movies.json")
 			assert.NoError(t, err)
 
 			handler.HandleFunc("/movies", func(w http.ResponseWriter, r *http.Request) {
@@ -139,9 +140,9 @@ func TestGetMovie(t *testing.T) {
 
 	for _, tc := range tt {
 		t.Run(tc.Name, func(t *testing.T) {
-			handler, client := setup(t)
+			handler, client := setupMCU(t)
 
-			fixture, err := os.ReadFile("fixtures/mcu/get-movie.json")
+			fixture, err := os.ReadFile("fixtures/get-movie.json")
 			assert.NoError(t, err)
 
 			handler.HandleFunc("/movies/1", func(w http.ResponseWriter, r *http.Request) {
@@ -169,14 +170,14 @@ func TestGetMovie(t *testing.T) {
 	}
 }
 
-func setup(t *testing.T) (*http.ServeMux, domain.MoviesService) {
+func setupMCU(t *testing.T) (*http.ServeMux, domain.MoviesService) {
 	handler := http.NewServeMux()
 
 	server := httptest.NewServer(handler)
 	serverURL, err := url.Parse(server.URL)
 	assert.NoError(t, err)
 
-	client := httpapi.NewMCUClient()
+	client := mcu.NewClient()
 	client.BaseURL = serverURL
 
 	return handler, client

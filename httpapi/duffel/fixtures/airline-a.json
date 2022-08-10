@@ -1,0 +1,61 @@
+{
+    "data": {
+        "offers": [
+            {
+                "arrival": "2019-10-21T09:00:00Z",
+                "departure": "2019-10-21T03:00:00Z",
+                "destination": "JFK",
+                "duration": 360,
+                "flight_number": "A1",
+                "id": "a-7fa7e8f0-1959-4453-bd9d-c279f9de16c5",
+                "origin": "LHR",
+                "total_amount": 45586,
+                "total_currency": "GBP"
+            },
+            {
+                "arrival": "2019-10-21T07:00:00Z",
+                "departure": "2019-10-21T01:00:00Z",
+                "destination": "JFK",
+                "duration": 360,
+                "flight_number": "A2",
+                "id": "a-a31ffbd3-04c0-484e-98d6-3311bae8a491",
+                "origin": "LHR",
+                "total_amount": 29872,
+                "total_currency": "GBP"
+            },
+            {
+                "arrival": "2019-10-21T17:00:00Z",
+                "departure": "2019-10-21T11:00:00Z",
+                "destination": "JFK",
+                "duration": 360,
+                "flight_number": "A3",
+                "id": "a-d1dad92f-261f-4663-bbd3-51903a42b4b6",
+                "origin": "LHR",
+                "total_amount": 35710,
+                "total_currency": "GBP"
+            },
+            {
+                "arrival": "2019-10-21T05:00:00Z",
+                "departure": "2019-10-20T23:00:00Z",
+                "destination": "JFK",
+                "duration": 360,
+                "flight_number": "A4",
+                "id": "a-896e5063-fa8e-4d08-bc63-22c3f9226c7f",
+                "origin": "LHR",
+                "total_amount": 31037,
+                "total_currency": "GBP"
+            },
+            {
+                "arrival": "2019-10-22T05:00:00Z",
+                "departure": "2019-10-21T23:00:00Z",
+                "destination": "JFK",
+                "duration": 360,
+                "flight_number": "A5",
+                "id": "a-02b29894-d1b0-4ab3-a76a-efec65aa557f",
+                "origin": "LHR",
+                "total_amount": 33081,
+                "total_currency": "GBP"
+            }
+        ]
+    }
+}
