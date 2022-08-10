@@ -15,7 +15,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"github.com/jace-ys/simple-api/httpapi"
+	"github.com/jace-ys/simple-api/httpapi/duffel"
+	"github.com/jace-ys/simple-api/httpapi/mcu"
 	"github.com/jace-ys/simple-api/server"
 )
 
@@ -61,7 +62,13 @@ func handler() http.Handler {
 
 	{
 		router := v1.PathPrefix("/mcu").Subrouter()
-		handler := server.NewMCUHandler(httpapi.NewMCUClient())
+		handler := server.NewMCUHandler(mcu.NewClient())
+		handler.RegisterRoutes(router)
+	}
+
+	{
+		router := v1.PathPrefix("/duffel").Subrouter()
+		handler := server.NewDuffelFlightsHandler(duffel.NewAirlineAClient(), duffel.NewAirlineBClient())
 		handler.RegisterRoutes(router)
 	}
 

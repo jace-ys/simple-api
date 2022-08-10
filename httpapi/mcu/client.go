@@ -1,40 +1,30 @@
-package httpapi
+package mcu
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
-	"errors"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
-	"strings"
 
 	"github.com/jace-ys/simple-api/domain"
+	"github.com/jace-ys/simple-api/httpapi"
 )
 
-var _ domain.MoviesService = (*MCUClient)(nil)
+var _ domain.MoviesService = (*Client)(nil)
 
-var (
-	ErrDownstreamUnavailable = errors.New("downstream unavailable")
-	ErrStatusCodeUnknown     = errors.New("unexpected response code")
-)
-
-type MCUClient struct {
+type Client struct {
 	BaseURL *url.URL
 	client  *http.Client
 }
 
-func NewMCUClient() *MCUClient {
+func NewClient() *Client {
 	url, err := url.Parse("https://mcuapi.herokuapp.com/api/v1/")
 	if err != nil {
 		panic(err)
 	}
 
-	return &MCUClient{
+	return &Client{
 		BaseURL: url,
 		client:  http.DefaultClient,
 	}
@@ -77,9 +67,9 @@ func (m *movie) toDomain() (*domain.Movie, error) {
 	}, nil
 }
 
-func (c *MCUClient) GetMovies(ctx context.Context) (domain.Movies, error) {
+func (c *Client) GetMovies(ctx context.Context) (domain.Movies, error) {
 	endpoint := "/movies"
-	req, err := c.newRequest(ctx, http.MethodGet, endpoint, nil)
+	req, err := httpapi.NewRequest(ctx, c.BaseURL, http.MethodGet, endpoint, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +77,7 @@ func (c *MCUClient) GetMovies(ctx context.Context) (domain.Movies, error) {
 	var res struct {
 		Data []movie `json:"data"`
 	}
-	rsp, err := c.do(req, &res)
+	rsp, err := httpapi.Do(c.client, req, &res)
 	if err != nil {
 		return nil, err
 	}
@@ -96,9 +86,9 @@ func (c *MCUClient) GetMovies(ctx context.Context) (domain.Movies, error) {
 	case rsp.StatusCode == http.StatusOK:
 		// OK
 	case 500 <= rsp.StatusCode && rsp.StatusCode <= 599:
-		return nil, fmt.Errorf("%w: %s", ErrDownstreamUnavailable, rsp.HTTPErrorBody)
+		return nil, fmt.Errorf("%w: %s", httpapi.ErrDownstreamUnavailable, rsp.HTTPErrorBody)
 	default:
-		return nil, fmt.Errorf("%w: %d", ErrStatusCodeUnknown, rsp.StatusCode)
+		return nil, fmt.Errorf("%w: %d", httpapi.ErrStatusCodeUnknown, rsp.StatusCode)
 	}
 
 	movies := make(domain.Movies, len(res.Data))
@@ -113,15 +103,15 @@ func (c *MCUClient) GetMovies(ctx context.Context) (domain.Movies, error) {
 	return movies, nil
 }
 
-func (c *MCUClient) GetMovie(ctx context.Context, movieID int) (*domain.Movie, error) {
+func (c *Client) GetMovie(ctx context.Context, movieID int) (*domain.Movie, error) {
 	endpoint := fmt.Sprintf("/movies/%d", movieID)
-	req, err := c.newRequest(ctx, http.MethodGet, endpoint, nil)
+	req, err := httpapi.NewRequest(ctx, c.BaseURL, http.MethodGet, endpoint, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	var res movie
-	rsp, err := c.do(req, &res)
+	rsp, err := httpapi.Do(c.client, req, &res)
 	if err != nil {
 		return nil, err
 	}
@@ -132,9 +122,9 @@ func (c *MCUClient) GetMovie(ctx context.Context, movieID int) (*domain.Movie, e
 	case rsp.StatusCode == http.StatusNotFound:
 		return nil, domain.ErrMovieNotFound
 	case 500 <= rsp.StatusCode && rsp.StatusCode <= 599:
-		return nil, fmt.Errorf("%w: %s", ErrDownstreamUnavailable, rsp.HTTPErrorBody)
+		return nil, fmt.Errorf("%w: %s", httpapi.ErrDownstreamUnavailable, rsp.HTTPErrorBody)
 	default:
-		return nil, fmt.Errorf("%w: %d", ErrStatusCodeUnknown, rsp.StatusCode)
+		return nil, fmt.Errorf("%w: %d", httpapi.ErrStatusCodeUnknown, rsp.StatusCode)
 	}
 
 	movie, err := res.toDomain()
@@ -143,66 +133,4 @@ func (c *MCUClient) GetMovie(ctx context.Context, movieID int) (*domain.Movie, e
 	}
 
 	return movie, nil
-}
-
-func (c *MCUClient) newRequest(ctx context.Context, method, endpoint string, body interface{}) (*http.Request, error) {
-	requestURL, err := c.BaseURL.Parse(strings.Trim(endpoint, "/"))
-	if err != nil {
-		return nil, err
-	}
-
-	var buf io.ReadWriter
-	if body != nil {
-		buf = &bytes.Buffer{}
-		err := json.NewEncoder(buf).Encode(body)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	req, err := http.NewRequestWithContext(ctx, method, requestURL.String(), buf)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
-
-	return req, nil
-}
-
-type Response struct {
-	*http.Response
-	HTTPErrorBody string
-}
-
-func (c *MCUClient) do(req *http.Request, v interface{}) (*Response, error) {
-	rsp, err := c.client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer rsp.Body.Close()
-
-	if rsp.StatusCode < 200 || rsp.StatusCode > 299 {
-		body, err := ioutil.ReadAll(rsp.Body)
-		if err != nil {
-			return nil, err
-		}
-
-		return &Response{
-			Response:      rsp,
-			HTTPErrorBody: string(body),
-		}, nil
-	}
-
-	if v != nil {
-		err = json.NewDecoder(rsp.Body).Decode(v)
-		if err != nil && !errors.Is(err, io.EOF) {
-			return nil, err
-		}
-	}
-
-	return &Response{
-		Response: rsp,
-	}, nil
 }
