@@ -48,17 +48,17 @@ func TestGetMovies(t *testing.T) {
 		ExpectedError    error
 	}{
 		{
-			Name:             "Returns movies when downstream request succeeds",
+			Name:             "Returns movies on response status 200",
 			DownstreamStatus: http.StatusOK,
 			ExpectedBody:     domain.Movies{movie1, movie2},
 		},
 		{
-			Name:             "Returns ErrDownstreamUnavailable when downstream unavailable",
+			Name:             "Returns ErrDownstreamUnavailable on response status 500",
 			DownstreamStatus: http.StatusInternalServerError,
 			ExpectedError:    httpapi.ErrDownstreamUnavailable,
 		},
 		{
-			Name:             "Returns ErrStatusCodeUnknown when downstream returns unrecognised status",
+			Name:             "Returns ErrStatusCodeUnknown on unrecognised response status",
 			DownstreamStatus: http.StatusUnauthorized,
 			ExpectedError:    httpapi.ErrStatusCodeUnknown,
 		},
